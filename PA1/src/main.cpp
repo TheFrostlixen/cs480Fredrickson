@@ -245,14 +245,14 @@ bool initialize()
     //Shader Sources
     // Put these into files and write a loader in the future
     // Note the added uniform!
-    char *vs = LoadShader( "vertex.shader" );
-	char *fs = LoadShader( "fragment.shader" );
+    char *vs = LoadShader( (char*)"vertex.shader" );
+    char *fs = LoadShader( (char*)"fragment.shader" );
 
     //compile the shaders
     GLint shader_status;
 
     // Vertex shader first
-    glShaderSource(vertex_shader, 1, (const GLchar*)&vs, NULL);
+    glShaderSource(vertex_shader, 1, (const GLchar**)&vs, NULL);
     glCompileShader(vertex_shader);
     //check the compile status
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &shader_status);
@@ -263,7 +263,7 @@ bool initialize()
     }
 
     // Now the Fragment shader
-    glShaderSource(fragment_shader, 1, (const GLchar*)&fs, NULL);
+    glShaderSource(fragment_shader, 1, (const GLchar**)&fs, NULL);
     glCompileShader(fragment_shader);
     //check the compile status
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &shader_status);
@@ -353,13 +353,16 @@ float getDT()
 
 char* LoadShader( char* path )
 {
-	ifstream fin;
-	string shader = "";
-	stringstream stream;
+	std::ifstream fin(path);
+	std::stringstream stream;
+	std::string shader = "";
 	
 	// load input shader file
-	fin.open(path);
-	
 	stream << fin.rdbuf(); // read buffer
 	shader = stream.str();
+	
+	char *temp = new char[shader.length() + 1];
+	strcpy(temp, shader.c_str());
+	return temp;
 }
+
