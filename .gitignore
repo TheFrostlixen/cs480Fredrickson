@@ -1,4 +1,4 @@
 *~
-*.exe
 *.o
-*.xex
+*.exe
+*.bin
