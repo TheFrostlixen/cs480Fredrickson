@@ -2,6 +2,9 @@
 #include <GL/glut.h> // doing otherwise causes compiler shouting
 #include <iostream>
 #include <chrono>
+#include <string>
+#include <fstream>
+#include <sstream>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -240,27 +243,14 @@ bool initialize()
     //Shader Sources
     // Put these into files and write a loader in the future
     // Note the added uniform!
-    const char *vs =
-        "attribute vec3 v_position;"
-        "attribute vec3 v_color;"
-        "varying vec3 color;"
-        "uniform mat4 mvpMatrix;"
-        "void main(void){"
-        "   gl_Position = mvpMatrix * vec4(v_position, 1.0);"
-        "   color = v_color;"
-        "}";
-
-    const char *fs =
-        "varying vec3 color;"
-        "void main(void){"
-        "   gl_FragColor = vec4(color.rgb, 1.0);"
-        "}";
+    char *vs = LoadShader( "vertex.shader" );
+	char *fs = LoadShader( "fragment.shader" );
 
     //compile the shaders
     GLint shader_status;
 
     // Vertex shader first
-    glShaderSource(vertex_shader, 1, &vs, NULL);
+    glShaderSource(vertex_shader, 1, (const GLchar*)&vs, NULL);
     glCompileShader(vertex_shader);
     //check the compile status
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &shader_status);
@@ -271,7 +261,7 @@ bool initialize()
     }
 
     // Now the Fragment shader
-    glShaderSource(fragment_shader, 1, &fs, NULL);
+    glShaderSource(fragment_shader, 1, (const GLchar*)&fs, NULL);
     glCompileShader(fragment_shader);
     //check the compile status
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &shader_status);
@@ -357,4 +347,17 @@ float getDT()
     ret = std::chrono::duration_cast< std::chrono::duration<float> >(t2-t1).count();
     t1 = std::chrono::high_resolution_clock::now();
     return ret;
+}
+
+char* LoadShader( char* path )
+{
+	ifstream fin;
+	string shader = "";
+	stringstream stream;
+	
+	// load input shader file
+	fin.open(path);
+	
+	stream << fin.rdbuf(); // read buffer
+	shader = stream.str();
 }
