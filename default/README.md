@@ -18,7 +18,7 @@ N/A
 >make
 ##How to run your program.
 >cd bin/
->./app
+>./app.bin
 ##Team Members
 N/A
 ##References Encountered

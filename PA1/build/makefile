@@ -13,7 +13,7 @@ CXXFLAGS= -g -Wall -std=c++0x
 all: ../bin/Matrix
 
 ../bin/Matrix: ../src/main.cpp
-	$(CC) $(CXXFLAGS) ../src/main.cpp -o ../bin/Matrix.xex $(LIBS)
+	$(CC) $(CXXFLAGS) ../src/main.cpp -o ../bin/Matrix.bin $(LIBS)
 
 clean:
 	rm -rf *.o ../bin/program
