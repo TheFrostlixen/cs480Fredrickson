@@ -17,7 +17,7 @@ N/A
 >make
 ##How to run your program.
 >cd bin/
->./Matrix.xex
+>./Matrix.bin
 ##Team Members
 N/A
 ##References Encountered

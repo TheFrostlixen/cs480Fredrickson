@@ -53,6 +53,8 @@ void cleanUp();
 float getDT();
 std::chrono::time_point<std::chrono::high_resolution_clock> t1,t2;
 
+//--Shader management
+char* LoadShader( char* path );
 
 //--Main
 int main(int argc, char **argv)

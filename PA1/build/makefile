@@ -17,4 +17,6 @@ all: ../bin/Matrix
 
 clean:
 	rm -rf *.o ../bin/program
+	rm -rf *.o ../build/program
+	rm -rf *.o ../src/program
 
