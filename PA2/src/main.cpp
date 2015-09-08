@@ -84,8 +84,8 @@ int main(int argc, char **argv)
 	glutMouseFunc(mouse); // Called if there is mouse shits on the floor
 	
 	// Set up menu
-	int id = glutCreateMenu(menuSelected);
-	glutSetMenu(id);
+	int menu_id = glutCreateMenu(menu);
+	glutSetMenu(menu_id);
 	glutAddMenuEntry("Start spinning", 0);
 	glutAddMenuEntry("Pause spinning", 1);
 	glutAddMenuEntry("Quit game", 2);
@@ -294,14 +294,15 @@ bool initialize()
 	// Load and compile shaders
 	Shader vertexShader;
 	Shader fragmentShader;
+	GLint shader_status;
 	
     vertexShader.Load("vertex.shader", GL_VERTEX_SHADER);
     fragmentShader.Load("fragment.shader", GL_FRAGMENT_SHADER);
 
     // Now we link the 2 shader objects into a program
     program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
+    glAttachShader(program, vertexShader.GetID());
+    glAttachShader(program, fragmentShader.GetID());
     glLinkProgram(program);
 	
     //check if everything linked ok
