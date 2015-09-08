@@ -10,13 +10,11 @@ LIBS= -lglut -lGLEW -lGL
 # Compiler flags
 CXXFLAGS= -g -Wall -std=c++0x
 
+# Source Files
+OBJS= ../src/*.cpp
+
 all: ../bin/Matrix
 
 ../bin/Matrix: ../src/main.cpp
-	$(CC) $(CXXFLAGS) ../src/main.cpp -o ../bin/Matrix.bin $(LIBS)
-
-clean:
-	rm -rf *.o ../bin/program
-	rm -rf *.o ../build/program
-	rm -rf *.o ../src/program
+	$(CC) $(CXXFLAGS) $(OBJS) -o ../bin/Matrix.bin $(LIBS)
 
