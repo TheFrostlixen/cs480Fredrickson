@@ -1,16 +1,14 @@
-#include <GL/glew.h> // glew must be included before the main gl libs
-#include <GL/glut.h> // doing otherwise causes compiler shouting
+#include "CShaderLoader.h"
 #include <iostream>
 #include <chrono>
-#include <string>
-#include <fstream>
-#include <sstream>
+
+#include <GL/glew.h> // glew must be included before the main gl libs
+#include <GL/glut.h> // doing otherwise causes compiler shouting
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp> //Makes passing matrices to shaders easier
-
 
 //--Data types
 //This object will define the attributes of a vertex(position, color, etc...)
@@ -54,12 +52,9 @@ void menu(int);
 bool initialize();
 void cleanUp();
 
-//--Random time things
+//--Time management
 float getDT();
 std::chrono::time_point<std::chrono::high_resolution_clock> t1,t2;
-
-//--Shader management
-char* LoadShader( char* path );
 
 //--Main
 int main(int argc, char **argv)
@@ -91,9 +86,9 @@ int main(int argc, char **argv)
 	// Set up menu
 	int id = glutCreateMenu(menuSelected);
 	glutSetMenu(id);
-	glutAddMenuEntry("nig", 0);
-	glutAddMenuEntry("cuck", 1);
-	glutAddMenuEntry("MALE LACTATION", 2);
+	glutAddMenuEntry("Start spinning", 0);
+	glutAddMenuEntry("Pause spinning", 1);
+	glutAddMenuEntry("Quit game", 2);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 	
     // Initialize all of our resources(shaders, geometry)
@@ -296,49 +291,23 @@ bool initialize()
 
     //--Geometry done
 
-    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	// Load and compile shaders
+	Shader vertexShader;
+	Shader fragmentShader;
+	
+    vertexShader.Load("vertex.shader", GL_VERTEX_SHADER);
+    fragmentShader.Load("fragment.shader", GL_FRAGMENT_SHADER);
 
-    //Shader Sources
-    // Put these into files and write a loader in the future
-    // Note the added uniform!
-    char *vs = LoadShader( (char*)"vertex.shader" );
-    char *fs = LoadShader( (char*)"fragment.shader" );
-
-    //compile the shaders
-    GLint shader_status;
-
-    // Vertex shader first
-    glShaderSource(vertex_shader, 1, (const GLchar**)&vs, NULL);
-    glCompileShader(vertex_shader);
-    //check the compile status
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &shader_status);
-    if(!shader_status)
-    {
-        std::cerr << "[F] FAILED TO COMPILE VERTEX SHADER!" << std::endl;
-        return false;
-    }
-
-    // Now the Fragment shader
-    glShaderSource(fragment_shader, 1, (const GLchar**)&fs, NULL);
-    glCompileShader(fragment_shader);
-    //check the compile status
-    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &shader_status);
-    if(!shader_status)
-    {
-        std::cerr << "[F] FAILED TO COMPILE FRAGMENT SHADER!" << std::endl;
-        return false;
-    }
-
-    //Now we link the 2 shader objects into a program
-    //This program is what is run on the GPU
+    // Now we link the 2 shader objects into a program
     program = glCreateProgram();
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
     glLinkProgram(program);
+	
     //check if everything linked ok
     glGetProgramiv(program, GL_LINK_STATUS, &shader_status);
-    if(!shader_status)
+    
+	if(!shader_status)
     {
         std::cerr << "[F] THE SHADER PROGRAM FAILED TO LINK" << std::endl;
         return false;
@@ -407,19 +376,3 @@ float getDT()
     t1 = std::chrono::high_resolution_clock::now();
     return ret;
 }
-
-char* LoadShader( char* path )
-{
-	std::ifstream fin(path);
-	std::stringstream stream;
-	std::string shader = "";
-	
-	// load input shader file
-	stream << fin.rdbuf(); // read buffer
-	shader = stream.str();
-	
-	char *temp = new char[shader.length() + 1];
-	strcpy(temp, shader.c_str());
-	return temp;
-}
-

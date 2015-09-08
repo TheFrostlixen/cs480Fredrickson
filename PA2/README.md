@@ -1,23 +1,30 @@
-CS 480 - PA1 - 09/02/2015
+CS 480 - PA2 - 09/09/2015
 ===
-This assignment achieves two goals.
+This assignment achieves three goals.
 
-1. Rotates a cube around the Y-axis while it orbits an arbitrary point in space.
+1. Introduced a context menu, containing options to start and stop spinning and quitting the game.
 
-2. Implements a shader loader to allow shader file updates without recompiling.
+2. Implements keyboard and mouse input as control methods.
+
+3. Separate class for the shader loader.
 
 ##Extra Credit
 N/A
 
 ##Issues Encountered
-- Had to explicitly define GLM to use radians, otherwise it gave loads of warnings. No other issues encountered.
+- N/A
 
 ##Libraries
 - GLM (OpenGL Mathematics)
 - GLUT (OpenGL Utility Toolkit)
 
 ##Keyboard/mouse controls:
-- N/A
+- *1:* Toggle cube's spin.
+
+- *2/Left Click:* Toggle cube's direction of spin.
+
+- *Right Click:* Open context menu.
+
 
 ##Instructions for compilation.
 >cd build/
