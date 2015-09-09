@@ -1,5 +1,6 @@
 #include "CShaderLoader.h"
 
+// Default constructor, set up vars to default values
 Shader::Shader()
 {
 	loaded = false;
@@ -7,6 +8,7 @@ Shader::Shader()
 	type = -1;
 }
 
+// Default destructor, handled in Delete member function
 Shader::~Shader()
 {
 	Delete();
@@ -55,6 +57,7 @@ bool Shader::Load( std::string path, GLuint sType )
 	glCompileShader( id );
 	glGetShaderiv( id, GL_COMPILE_STATUS, &compiled );
 	
+	// Check compilation status for failure
     if (compiled != GL_TRUE)
     {
         // Print an error message
@@ -72,8 +75,10 @@ bool Shader::Load( std::string path, GLuint sType )
 
     return loaded;
 }
+
 bool Shader::Delete()
 {
+	// if the shader exists, it is allowed to delete
 	if (loaded)
 	{
 		glDeleteShader(id);
@@ -82,21 +87,8 @@ bool Shader::Delete()
 		
 		return true;
 	}
+	// if the shader doesn't exist, return failure
 	else
-		return !loaded;
+		return false;
 }
 
-bool Shader::IsLoaded()
-{
-	return loaded;
-}
-
-GLuint Shader::GetType()
-{
-	return type;
-}
-
-GLuint Shader::GetID()
-{
-	return id;
-}
