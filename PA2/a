@@ -1,0 +1,5 @@
+cd build/;
+make;
+cd ../bin;
+./Matrix.bin;
+

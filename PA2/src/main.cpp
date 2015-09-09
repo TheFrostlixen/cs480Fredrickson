@@ -23,9 +23,8 @@ struct Vertex
 int w = 640, h = 480;// Window size
 GLuint program;// The GLSL program handle
 GLuint vbo_geometry;// VBO handle for our geometry
-int menuSelected;
-bool isSpinning;
-bool spinReverse;
+bool isSpinning = true;
+bool spinReverse = false;
 
 //uniform locations
 GLint loc_mvpmat;// Location of the modelviewprojection matrix in the shader
@@ -154,8 +153,8 @@ void render()
 void update()
 {
     //total time
-    static float angleTranslation = 0.0;
-    static float angleRotation = 0.0;
+    static float angleTranslation = 0.0; // spin/orbit
+    static float angleRotation = 0.0; // rotation
     float dt = getDT();// if you have anything moving, use dt.
 
     angleTranslation += dt * M_PI/2; //move through 90 degrees a second
@@ -169,21 +168,6 @@ void update()
 			angleRotation += dt * M_PI/2;
 	}
 	model = glm::rotate(model, 2*angleRotation, glm::vec3(0.0f, 1.0f, 0.0f));
-	
-	switch (menuSelected)
-	{
-		case 0:
-			isSpinning = true;
-			break;
-			
-		case 1:
-			isSpinning = false;
-			break;
-			
-		case 2:
-			exit(0);
-			break;
-	}
 	
     // Update the state of the scene
     glutPostRedisplay();//call the display callback
@@ -227,7 +211,20 @@ void mouse(int btn, int state, int xPos, int yPos)
 
 void menu(int value)
 {
-	menuSelected = value;
+	switch (value)
+	{
+		case 0:
+			isSpinning = true;
+			break;
+
+		case 1:
+			isSpinning = false;
+			break;
+
+		case 2:
+			exit(0);
+			break;
+	}
 }
 
 bool initialize()
