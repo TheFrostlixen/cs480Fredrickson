@@ -12,7 +12,7 @@ This assignment achieves three goals.
 N/A
 
 ##Issues Encountered
-- N/A
+N/A
 
 ##Libraries
 - GLM (OpenGL Mathematics)
