@@ -1,7 +1,8 @@
 #ifndef CSHADERLOADER_H
 #define CSHADERLOADER_H
 
-#include <GL/glew.h>
+#include "global.h"
+
 #include <string>
 #include <fstream>
 #include <sstream>

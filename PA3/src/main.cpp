@@ -1,14 +1,7 @@
 #include "CShaderLoader.h"
+#include "global.h"
 #include <iostream>
 #include <chrono>
-
-#include <GL/glew.h> // glew must be included before the main gl libs
-#include <GL/glut.h> // doing otherwise causes compiler shouting
-
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp> //Makes passing matrices to shaders easier
 
 //--Data types
 //This object will define the attributes of a vertex(position, color, etc...)
@@ -159,7 +152,11 @@ void update()
 	float dt = getDT();// if you have anything moving, use dt.
 
 	angleTranslation += dt * M_PI/2; //move through 90 degrees a second
-	model = glm::translate( glm::mat4(1.0f), glm::vec3(4.0 * sin(angleTranslation), 0.0, 4.0 * cos(angleTranslation)));
+
+
+	double lat_radius = 4.0f;
+	double long_radius = 4.0f;
+	model = glm::translate( glm::mat4(1.0f), glm::vec3(lat_radius * sin(angleTranslation), 0.0, long_radius * cos(angleTranslation)));
 
 	// check spinning flag
 	if (isSpinning)

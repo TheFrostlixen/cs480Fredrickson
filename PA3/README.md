@@ -1,18 +1,16 @@
-CS 480 - PA2 - 09/09/2015
+CS 480 - PA3 - 09/16/2015
 ===
-This assignment achieves three goals.
+This assignment achieves  goals.
 
-1. Introduced a context menu, containing options to start and stop spinning and quitting the game.
+1. 
 
-2. Implements keyboard and mouse input as control methods.
-
-3. Separate class for the shader loader.
+2. 
 
 ##Extra Credit
 N/A
 
 ##Issues Encountered
-- N/A
+N/A
 
 ##Libraries
 - GLM (OpenGL Mathematics)
