@@ -9,15 +9,18 @@ class Model
 		Model();
 		~Model();
 
-		glm::mat4 Orbit(glm::mat4, float);
-		glm::mat4 Spin();
-		void SwitchSpin();
+		void Orbit(glm::mat4, float);
+		void Spin(float);
+		void SwitchSpinDirection();
+		bool ToggleSpin();
 
 		/** Getters & Setters **/
 		void SetOrbit(float, float);
+		void SetSpinning(bool);
 		
 		glm::mat4 GetModel() { return model; }
-		void SetModel( glm::mat4 m ) { model = m; }
+
+		bool IsSpinning() { return isSpinning; }
 
 	private:
 		glm::mat4 model;

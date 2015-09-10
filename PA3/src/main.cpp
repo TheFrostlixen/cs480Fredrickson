@@ -1,5 +1,7 @@
-#include "CShaderLoader.h"
 #include "global.h"
+#include "CShaderLoader.h"
+#include "CModel.h"
+
 #include <iostream>
 #include <chrono>
 
@@ -16,8 +18,6 @@ struct Vertex
 int w = 640, h = 480;// Window size
 GLuint program;// The GLSL program handle
 GLuint vbo_geometry;// VBO handle for our geometry
-bool isSpinning = true;
-bool spinReverse = false;
 
 //uniform locations
 GLint loc_mvpmat;// Location of the modelviewprojection matrix in the shader
@@ -27,7 +27,7 @@ GLint loc_position;
 GLint loc_color;
 
 //transform matrices
-glm::mat4 model;//obj->world each object should have its own model matrix
+Model planet;
 glm::mat4 view;//world->eye
 glm::mat4 projection;//eye->clip
 glm::mat4 mvp;//premultiplied modelviewprojection
@@ -106,7 +106,7 @@ void render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//premultiply the matrix for this example
-	mvp = projection * view * model;
+	mvp = projection * view * planet.GetModel();
 
 	//enable the shader program
 	glUseProgram(program);
@@ -147,30 +147,18 @@ void render()
 void update()
 {
 	//total time
-	static float angleTranslation = 0.0; // spin/orbit
-	static float angleRotation = 0.0; // rotation
+	static float angleTranslation = 0.0f;
 	float dt = getDT();// if you have anything moving, use dt.
 
-	angleTranslation += dt * M_PI/2; //move through 90 degrees a second
+	angleTranslation += dt * M_PI/2.0; //move through 90 degrees a second
 
+	// Make the planet orbit
+	planet.SetOrbit(4.0f, 4.0f);
+	planet.Orbit( glm::mat4(1.0f), angleTranslation );
 
-	double lat_radius = 4.0f;
-	double long_radius = 4.0f;
-	model = glm::translate( glm::mat4(1.0f), glm::vec3(lat_radius * sin(angleTranslation), 0.0, long_radius * cos(angleTranslation)));
+	// Make the planet spin (if it should be spinning)
+	planet.Spin( dt );
 
-	// check spinning flag
-	if (isSpinning)
-	{
-		// check which direction it's spinning
-		if (spinReverse)
-			angleRotation -= dt * M_PI/2;
-		else
-			angleRotation += dt * M_PI/2;
-	}
-	// update the model matrix
-	// NOTE: if put inside the above if statement, the cube will reset to default angle on pause
-	model = glm::rotate(model, 2*angleRotation, glm::vec3(0.0f, 1.0f, 0.0f));
-	
 	// Update the state of the scene
 	glutPostRedisplay();//call the display callback
 }
@@ -195,11 +183,11 @@ void keyboard(unsigned char key, int x_pos, int y_pos)
 	}
 	else if (key == '1')
 	{
-		isSpinning = !isSpinning;
+		planet.ToggleSpin();
 	}
 	else if (key == '2')
 	{
-		spinReverse = !spinReverse;
+		planet.SwitchSpinDirection();
 	}
 }
 
@@ -208,7 +196,7 @@ void mouse(int btn, int state, int xPos, int yPos)
 	// On left mouse click, reverse the spin direction
 	if (btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		spinReverse = !spinReverse;
+		planet.SwitchSpinDirection();
 	}
 }
 
@@ -219,12 +207,12 @@ void menu(int value)
 	{
 		// Start spinning
 		case 0:
-			isSpinning = true;
+			planet.SetSpinning(true);
 			break;
 
 		// Pause spinning
 		case 1:
-			isSpinning = false;
+			planet.SetSpinning(false);
 			break;
 
 		// Exit game
@@ -379,3 +367,4 @@ float getDT()
 	t1 = std::chrono::high_resolution_clock::now();
 	return ret;
 }
+

@@ -4,20 +4,22 @@ Model::Model()
 {
 	lat_radius = 0.0f;
 	long_radius = 0.0f;
+	isSpinning = true;
+	spinDirection = false;
 }
 
 Model::~Model()
 {
 	lat_radius = 0.0f;
 	long_radius = 0.0f;
-	model = NULL;
+	isSpinning = false;
+	spinDirection = false;
 }
 
-glm::mat4 Model::Spin()
+void Model::Spin(float dt)
 {
 	//total time
 	static float angleRotation = 0.0; // rotation
-	float dt = getDT();// if you have anything moving, use dt.
 
 	// check spinning flag
 	if (isSpinning)
@@ -30,15 +32,20 @@ glm::mat4 Model::Spin()
 	}
 	// update the model matrix
 	model = glm::rotate(model, 2*angleRotation, glm::vec3(0.0f, 1.0f, 0.0f));
-	return model;
 }
 
-void Model::SwitchSpin()
+void Model::SwitchSpinDirection()
 {
 	spinDirection = !spinDirection;
 }
 
-glm::mat4 Model::Orbit( glm::mat4 view, float theta )
+bool Model::ToggleSpin()
+{
+	isSpinning = !isSpinning;
+	return isSpinning;
+}
+
+void Model::Orbit( glm::mat4 view, float theta )
 {
 	model = glm::translate( view,
 						    glm::vec3( lat_radius * sin(theta),
@@ -46,7 +53,6 @@ glm::mat4 Model::Orbit( glm::mat4 view, float theta )
 									   long_radius * cos(theta)
 								     )
 						   );
-	return model;
 }
 
 /** Getters & Setters **/
@@ -55,3 +61,9 @@ void Model::SetOrbit( float latitude, float longitude )
 	lat_radius = latitude;
 	long_radius = longitude;
 }
+
+void Model::SetSpinning( bool spin )
+{
+	isSpinning = spin;
+}
+
