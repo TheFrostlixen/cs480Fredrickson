@@ -12,6 +12,7 @@ class Model
 		void Orbit(glm::mat4, float);
 		void Spin(float);
 		void SwitchSpinDirection();
+		void SwitchSpinDirection(bool);
 		bool ToggleSpin();
 
 		/** Getters & Setters **/

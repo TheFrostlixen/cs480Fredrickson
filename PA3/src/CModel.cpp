@@ -18,19 +18,19 @@ Model::~Model()
 
 void Model::Spin(float dt)
 {
-	//total time
-	static float angleRotation = 0.0; // rotation
+	// Rotation
+	static float angleRotation = 0.0;
 
-	// check spinning flag
+	// Check spinning flag
 	if (isSpinning)
 	{
-		// check which direction it's spinning
+		// Check which direction it's spinning
 		if (spinDirection)
 			angleRotation -= dt * M_PI/2;
 		else
 			angleRotation += dt * M_PI/2;
 	}
-	// update the model matrix
+	// Update the model matrix
 	model = glm::rotate(model, 2*angleRotation, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
@@ -39,18 +39,30 @@ void Model::SwitchSpinDirection()
 	spinDirection = !spinDirection;
 }
 
+void Model::SwitchSpinDirection( bool ccw )
+{
+	spinDirection = dir;
+}
+
 bool Model::ToggleSpin()
 {
 	isSpinning = !isSpinning;
 	return isSpinning;
 }
 
-void Model::Orbit( glm::mat4 view, float theta )
+void Model::Orbit( glm::mat4 origin, float dt )
 {
-	model = glm::translate( view,
-						    glm::vec3( lat_radius * sin(theta),
+	// Translation angle
+	static float angleTranslation = 0.0f;
+	
+	// Move through 90 degrees a second
+	angleTranslation += dt * M_PI/2.0;
+
+	// Update the model matrix
+	model = glm::translate( origin,
+						    glm::vec3( lat_radius * sin(angleTranslation),
 									   0.0f,
-									   long_radius * cos(theta)
+									   long_radius * cos(angleTranslation)
 								     )
 						   );
 }

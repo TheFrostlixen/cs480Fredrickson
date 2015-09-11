@@ -11,11 +11,12 @@ class Shader
 {
 	public:
 		Shader();
+		Shader(std::string, GLuint);
 		~Shader();
 
 		// load and compile a shader program
 		//  returns success/failure flag
-		bool Load(std::string path, GLuint sType);
+		bool Load(std::string, GLuint);
 
 		// delete a shader program
 		bool Delete();

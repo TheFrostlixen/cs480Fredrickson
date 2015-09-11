@@ -35,7 +35,6 @@ glm::mat4 mvp;			// premultiplied model-view-projection
 std::chrono::time_point<std::chrono::high_resolution_clock> t1,t2;
 
 /** GLUT Callbacks **/
-void setCallbacksAndMenu();
 void render();
 void update();
 void reshape(int n_w, int n_h);
@@ -55,8 +54,9 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(w, h);
+	
 	// Name and create the Window
-	glutCreateWindow("Matrix Example");
+	glutCreateWindow("CS 480 - Fredrickson");
 
 	// Now that the window is created the GL context is fully set up
 	// Because of that we can now initialize GLEW to prepare work with shaders
@@ -69,23 +69,6 @@ int main(int argc, char **argv)
 	}
 
 	// Set the GLUT callbacks and our context menu
-	setCallbacksAndMenu();
-	
-	// Initialize all of our resources (shaders & geometry)
-	if ( initialize() )
-	{
-		t1 = std::chrono::high_resolution_clock::now();
-		glutMainLoop();
-	}
-
-	// Clean up after ourselves
-	cleanUp();
-	return 0;
-}
-
-void setCallbacksAndMenu()
-{
-	// Set all of the callbacks to GLUT that we need
 	glutDisplayFunc(render);	// Called to render the scene
 	glutReshapeFunc(reshape);	// Called if the window is resized
 	glutIdleFunc(update);		// Called if there is nothing else to do
@@ -99,22 +82,33 @@ void setCallbacksAndMenu()
 	glutAddMenuEntry("Pause spinning", 1);
 	glutAddMenuEntry("Quit game", 2);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
+	
+	// Initialize all of our resources (shaders & geometry)
+	if ( initialize() )
+	{
+		t1 = std::chrono::high_resolution_clock::now();
+		glutMainLoop();
+	}
+
+	// Clean up after ourselves
+	cleanUp();
+	return 0;
 }
 
 /** GLUT Callback Functions **/
 void render()
 {
-	//clear the screen
+	// Clear the screen
 	glClearColor(0.0, 0.0, 0.2, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//premultiply the matrix for this example
+	// Premultiply the matrix for this example
 	mvp = projection * view * planet.GetModel();
 
-	//enable the shader program
+	// Enable the shader program
 	glUseProgram(program);
 
-	//upload the matrix to the shader
+	// Upload the matrix to the shader
 	glUniformMatrix4fv(loc_mvpmat, 1, GL_FALSE, glm::value_ptr(mvp));
 
 	//set up the Vertex Buffer Object so it can be drawn
@@ -122,41 +116,38 @@ void render()
 	glEnableVertexAttribArray(loc_color);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_geometry);
 
-	//set pointers into the vbo for each of the attributes(position and color)
-	glVertexAttribPointer( loc_position, //location of attribute
-							3, //number of elements
-							GL_FLOAT, //type
-							GL_FALSE, //normalized?
-							sizeof(Vertex), //stride
-							0 ); //offset
+	// Set pointers into the vbo for each of the attributes(position and color)
+	glVertexAttribPointer( loc_position,	// location of attribute
+						   3,				// number of elements
+						   GL_FLOAT,		// type
+						   GL_FALSE,		// normalized
+						   sizeof(Vertex),	// stride
+						   0 );				// offset in the geometry array
 
 	glVertexAttribPointer( loc_color,
-							3,
-							GL_FLOAT,
-							GL_FALSE,
-							sizeof(Vertex),
-							(void*)offsetof(Vertex,color) );
+						   3,
+						   GL_FLOAT,
+						   GL_FALSE,
+						   sizeof(Vertex),
+						   (void*)offsetof(Vertex,color) );
 
-	glDrawArrays(GL_TRIANGLES, 0, 36); //mode, starting index, count
+	glDrawArrays(GL_TRIANGLES, 0, 36); // mode, starting index, count
 
-	//clean up
+	// Clean up
 	glDisableVertexAttribArray(loc_position);
 	glDisableVertexAttribArray(loc_color);
 						
-	//swap the buffers
+	// Swap the buffers
 	glutSwapBuffers();
 }
 
 void update()
 {
 	//total time
-	static float angleTranslation = 0.0f;
 	float dt = getDT(); // if you have anything moving, use dt.
-
-	angleTranslation += dt * M_PI/2.0; //move through 90 degrees a second
-
-	// Make the planet orbit
-	planet.Orbit( glm::mat4(1.0f), angleTranslation );
+	
+	// Make the planet orbit (with origin at 1.0f)
+	planet.Orbit( glm::mat4(1.0f), dt );
 
 	// Make the planet spin (if it should be spinning)
 	planet.Spin( dt );
@@ -189,7 +180,7 @@ void keyboard(unsigned char key, int x_pos, int y_pos)
 	{
 		planet.ToggleSpin();
 	}
-	else if (key == '2')
+	else if (key == GLUT_KEY_LEFT || key == GLUT_KEY_RIGHT)
 	{
 		planet.SwitchSpinDirection();
 	}
@@ -291,11 +282,11 @@ bool initialize()
 	// Geometry is done
 
 	// Load and compile shaders
-	Shader vertexShader;
-	Shader fragmentShader;
+	Shader vertexShader("vertex.shader", GL_VERTEX_SHADER);
+	Shader fragmentShader("fragment.shader", GL_FRAGMENT_SHADER);
 	
-	vertexShader.Load("vertex.shader", GL_VERTEX_SHADER);
-	fragmentShader.Load("fragment.shader", GL_FRAGMENT_SHADER);
+	//vertexShader.Load("vertex.shader", GL_VERTEX_SHADER);
+	//fragmentShader.Load("fragment.shader", GL_FRAGMENT_SHADER);
 
 	// Link the 2 shader objects into a program
 	program = glCreateProgram();
@@ -338,16 +329,17 @@ bool initialize()
 	planet.SetOrbit(4.0f, 4.0f); // doesn't need to be dynamically set (yet)
 	
 	// Init the view and projection matrices
-	//  matrices are set statically because the camera is static
-	view = glm::lookAt( glm::vec3(0.0, 8.0, -16.0),		//Eye Position
-						glm::vec3(0.0, 0.0, 0.0),		//Focus point
-						glm::vec3(0.0, 1.0, 0.0) );		//Positive Y is up
+	//  Matrices are set statically because the camera is static
+	view = glm::lookAt( glm::vec3(0.0, 8.0, -16.0),		// Eye Position
+						glm::vec3(0.0, 0.0, 0.0),		// Focus point
+						glm::vec3(0.0, 1.0, 0.0) );		// Y+ is up
 
 	projection = glm::perspective( 45.0f,				// FoV (90 degrees)
 								   float(w)/float(h),	// Aspect ratio
 								   0.01f,				// Distance to the near plane
 								   100.0f );			// Distance to the far plane 
 
+	// Depth testing tells not to draw far-away occluded objects
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
@@ -370,5 +362,5 @@ float getDT()
 }
 
 /** End Resource Management Functions **/
-/** End MAIN.CPP **/
 
+/** End MAIN.CPP **/
