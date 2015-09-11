@@ -5,34 +5,37 @@
 #include <iostream>
 #include <chrono>
 
-//--Data types
-//This object will define the attributes of a vertex(position, color, etc...)
+/** Data types **/
 struct Vertex
 {
 	GLfloat position[3];
 	GLfloat color[3];
 };
 
-//--Evil Global variables
-//Just for this example!
-int w = 640, h = 480;// Window size
-GLuint program;// The GLSL program handle
-GLuint vbo_geometry;// VBO handle for our geometry
+/** Global Variables **/
+int w = 640, h = 480; // Window size
+GLuint program; // The GLSL program handle
+GLuint vbo_geometry; // VBO handle for our geometry
 
-//uniform locations
-GLint loc_mvpmat;// Location of the modelviewprojection matrix in the shader
+// uniform locations
+GLint loc_mvpmat; // Location of the model-view-projection matrix in the shader
 
-//attribute locations
+// attribute locations
 GLint loc_position;
 GLint loc_color;
 
-//transform matrices
+// transform matrices
 Model planet;
-glm::mat4 view;//world->eye
-glm::mat4 projection;//eye->clip
-glm::mat4 mvp;//premultiplied modelviewprojection
+Model moon;
+glm::mat4 view;			// world -> eye
+glm::mat4 projection;	// eye -> clip
+glm::mat4 mvp;			// premultiplied model-view-projection
 
-//--GLUT Callbacks
+// time management
+std::chrono::time_point<std::chrono::high_resolution_clock> t1,t2;
+
+/** GLUT Callbacks **/
+void setCallbacksAndMenu();
 void render();
 void update();
 void reshape(int n_w, int n_h);
@@ -40,15 +43,12 @@ void keyboard(unsigned char key, int x_pos, int y_pos);
 void mouse(int btn, int state, int xPos, int yPos);
 void menu(int);
 
-//--Resource management
+/** Resource management **/
 bool initialize();
 void cleanUp();
-
-//--Time management
 float getDT();
-std::chrono::time_point<std::chrono::high_resolution_clock> t1,t2;
 
-//--Main
+/** Application entry point **/
 int main(int argc, char **argv)
 {
 	// Initialize glut
@@ -68,24 +68,11 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	// Set all of the callbacks to GLUT that we need
-	glutDisplayFunc(render);// Called when its time to display
-	glutReshapeFunc(reshape);// Called if the window is resized
-	glutIdleFunc(update);// Called if there is nothing else to do
-	glutKeyboardFunc(keyboard);// Called if there is keyboard input
-	glutMouseFunc(mouse); // Called if there is mouse shits on the floor
+	// Set the GLUT callbacks and our context menu
+	setCallbacksAndMenu();
 	
-	// Set up menu
-	int menu_id = glutCreateMenu(menu);
-	glutSetMenu(menu_id);
-	glutAddMenuEntry("Start spinning", 0);
-	glutAddMenuEntry("Pause spinning", 1);
-	glutAddMenuEntry("Quit game", 2);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
-	
-	// Initialize all of our resources(shaders, geometry)
-	bool init = initialize();
-	if(init)
+	// Initialize all of our resources (shaders & geometry)
+	if ( initialize() )
 	{
 		t1 = std::chrono::high_resolution_clock::now();
 		glutMainLoop();
@@ -96,11 +83,27 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-//--Implementations
+void setCallbacksAndMenu()
+{
+	// Set all of the callbacks to GLUT that we need
+	glutDisplayFunc(render);	// Called to render the scene
+	glutReshapeFunc(reshape);	// Called if the window is resized
+	glutIdleFunc(update);		// Called if there is nothing else to do
+	glutKeyboardFunc(keyboard);	// Called if there is keyboard input
+	glutMouseFunc(mouse);		// Called if there is mouse input
+
+	// Set up menu
+	int menu_id = glutCreateMenu(menu);
+	glutSetMenu(menu_id);
+	glutAddMenuEntry("Start spinning", 0);
+	glutAddMenuEntry("Pause spinning", 1);
+	glutAddMenuEntry("Quit game", 2);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
+/** GLUT Callback Functions **/
 void render()
 {
-	//--Render the scene
-
 	//clear the screen
 	glClearColor(0.0, 0.0, 0.2, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -148,36 +151,37 @@ void update()
 {
 	//total time
 	static float angleTranslation = 0.0f;
-	float dt = getDT();// if you have anything moving, use dt.
+	float dt = getDT(); // if you have anything moving, use dt.
 
 	angleTranslation += dt * M_PI/2.0; //move through 90 degrees a second
 
 	// Make the planet orbit
-	planet.SetOrbit(4.0f, 4.0f);
 	planet.Orbit( glm::mat4(1.0f), angleTranslation );
 
 	// Make the planet spin (if it should be spinning)
 	planet.Spin( dt );
 
 	// Update the state of the scene
-	glutPostRedisplay();//call the display callback
+	glutPostRedisplay(); //call the display callback
 }
 
 void reshape(int n_w, int n_h)
 {
+	// Set the width and height to new resized values
 	w = n_w;
 	h = n_h;
-	//Change the viewport to be correct
+
+	// Change the viewport to match resize
 	glViewport( 0, 0, w, h);
-	//Update the projection matrix as well
-	//See the init function for an explaination
+
+	// Update the projection matrix
 	projection = glm::perspective(45.0f, float(w)/float(h), 0.01f, 100.0f);
 }
 
 void keyboard(unsigned char key, int x_pos, int y_pos)
 {
 	// Handle keyboard input
-	if(key == 27)//ESC
+	if(key == 27) // ESC
 	{
 		exit(0);
 	}
@@ -222,6 +226,9 @@ void menu(int value)
 	}
 }
 
+/** End GLUT Callback Functions **/
+
+/** Resource Management Functions **/
 bool initialize()
 {
 	// Initialize basic geometry and shaders for this example
@@ -277,28 +284,27 @@ bool initialize()
 						  {{1.0, -1.0, 1.0}, {1.0, 0.0, 1.0}}
 						};
 
-	// Create a Vertex Buffer object to store this vertex info on the GPU
+	// Create a Vertex Buffer object (VBO) to store this vertex info on the GPU
 	glGenBuffers(1, &vbo_geometry);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_geometry);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(geometry), geometry, GL_STATIC_DRAW);
-
-	//--Geometry done
+	// Geometry is done
 
 	// Load and compile shaders
 	Shader vertexShader;
 	Shader fragmentShader;
-	GLint shader_status;
 	
 	vertexShader.Load("vertex.shader", GL_VERTEX_SHADER);
 	fragmentShader.Load("fragment.shader", GL_FRAGMENT_SHADER);
 
-	// Now we link the 2 shader objects into a program
+	// Link the 2 shader objects into a program
 	program = glCreateProgram();
 	glAttachShader(program, vertexShader.GetID());
 	glAttachShader(program, fragmentShader.GetID());
 	glLinkProgram(program);
 	
-	//check if everything linked ok
+	// Check if the shaders linked properly
+	GLint shader_status;
 	glGetProgramiv(program, GL_LINK_STATUS, &shader_status);
 	
 	if(!shader_status)
@@ -307,58 +313,53 @@ bool initialize()
 		return false;
 	}
 
-	//Now we set the locations of the attributes and uniforms
-	//this allows us to access them easily while rendering
+	// Set the locations of the attributes (out) and uniforms (in)
+	//  this allows us to access them easily while rendering
 	loc_position = glGetAttribLocation(program, const_cast<const char*>("v_position"));
 	if(loc_position == -1)
 	{
 		std::cerr << "[F] POSITION NOT FOUND" << std::endl;
 		return false;
 	}
-
 	loc_color = glGetAttribLocation(program, const_cast<const char*>("v_color"));
 	if(loc_color == -1)
 	{
 		std::cerr << "[F] V_COLOR NOT FOUND" << std::endl;
 		return false;
 	}
-
 	loc_mvpmat = glGetUniformLocation(program, const_cast<const char*>("mvpMatrix"));
 	if(loc_mvpmat == -1)
 	{
 		std::cerr << "[F] MVPMATRIX NOT FOUND" << std::endl;
 		return false;
 	}
+
+	// Set up any parameters for the models
+	planet.SetOrbit(4.0f, 4.0f); // doesn't need to be dynamically set (yet)
 	
-	//--Init the view and projection matrices
-	//	if you will be having a moving camera the view matrix will need to more dynamic
-	//	...Like you should update it before you render more dynamic 
-	//	for this project having them static will be fine
-	view = glm::lookAt( glm::vec3(0.0, 8.0, -16.0), //Eye Position
-						glm::vec3(0.0, 0.0, 0.0), //Focus point
-						glm::vec3(0.0, 1.0, 0.0)); //Positive Y is up
+	// Init the view and projection matrices
+	//  matrices are set statically because the camera is static
+	view = glm::lookAt( glm::vec3(0.0, 8.0, -16.0),		//Eye Position
+						glm::vec3(0.0, 0.0, 0.0),		//Focus point
+						glm::vec3(0.0, 1.0, 0.0) );		//Positive Y is up
 
-	projection = glm::perspective( 45.0f, //the FoV typically 90 degrees is good which is what this is set to
-								   float(w)/float(h), //Aspect Ratio, so Circles stay Circular
-								   0.01f, //Distance to the near plane, normally a small value like this
-								   100.0f); //Distance to the far plane, 
+	projection = glm::perspective( 45.0f,				// FoV (90 degrees)
+								   float(w)/float(h),	// Aspect ratio
+								   0.01f,				// Distance to the near plane
+								   100.0f );			// Distance to the far plane 
 
-	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	//and its done
 	return true;
 }
 
 void cleanUp()
 {
-	// Clean up, Clean up
 	glDeleteProgram(program);
 	glDeleteBuffers(1, &vbo_geometry);
 }
 
-//returns the time delta
 float getDT()
 {
 	float ret;
@@ -367,4 +368,7 @@ float getDT()
 	t1 = std::chrono::high_resolution_clock::now();
 	return ret;
 }
+
+/** End Resource Management Functions **/
+/** End MAIN.CPP **/
 
