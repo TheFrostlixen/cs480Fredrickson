@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(w, h);
-	
+
 	// Name and create the Window
 	glutCreateWindow("CS 480 - Fredrickson");
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	glutAddMenuEntry("Pause spinning", 1);
 	glutAddMenuEntry("Quit game", 2);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
-	
+
 	// Initialize all of our resources (shaders & geometry)
 	if ( initialize() )
 	{
@@ -135,10 +135,14 @@ void render()
 
 	glDrawArrays(GL_TRIANGLES, 0, 36); // mode, starting index, count
 
+	mvp = projection * view * moon.GetModel();
+	glUniformMatrix4fv(loc_mvpmat, 1, GL_FALSE, glm::value_ptr(mvp));
+	glDrawArrays(GL_TRIANGLES, 0, 36); // mode, starting index, count
+
 	// Clean up
 	glDisableVertexAttribArray(loc_position);
 	glDisableVertexAttribArray(loc_color);
-						
+
 	// Swap the buffers
 	glutSwapBuffers();
 }
@@ -147,15 +151,18 @@ void update()
 {
 	//total time
 	float dt = getDT(); // if you have anything moving, use dt.
-	
+
 	// Make the planet orbit (with origin at 1.0f)
-	planet.Orbit( glm::mat4(1.0f), dt );
+	planet.Orbit( glm::mat4(1.0f), dt, true);
+
+    moon.Orbit(planet.GetModel(), dt, false, 4.0f);
+    moon.Scale(glm::vec3(0.3, 0.3, 0.3));
+
+	// Orbit the moon around the planet
+//	moon.Orbit( planet.GetModel(), dt, true );
 
 	// Make the planet spin appropriately
 	planet.Spin( dt );
-
-	// Orbit the moon around the planet
-	moon.Orbit( planet.GetModel(), dt );
 
 	// Update the state of the scene
 	glutPostRedisplay(); //call the display callback
@@ -253,7 +260,7 @@ bool initialize()
 						  {{1.0, 1.0, -1.0}, {1.0, 1.0, 0.0}},
 						  {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
 						  {{-1.0, 1.0, -1.0}, {0.0, 1.0, 0.0}},
-							
+
 						  {{1.0, -1.0, 1.0}, {1.0, 0.0, 1.0}},
 						  {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
 						  {{1.0, -1.0, -1.0}, {1.0, 0.0, 0.0}},
@@ -273,7 +280,7 @@ bool initialize()
 						  {{-1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}},
 						  {{-1.0, -1.0, 1.0}, {0.0, 0.0, 1.0}},
 						  {{1.0, -1.0, 1.0}, {1.0, 0.0, 1.0}},
-							
+
 						  {{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}},
 						  {{1.0, -1.0, -1.0}, {1.0, 0.0, 0.0}},
 						  {{1.0, 1.0, -1.0}, {1.0, 1.0, 0.0}},
@@ -304,7 +311,7 @@ bool initialize()
 	// Load and compile shaders
 	Shader vertexShader;
 	Shader fragmentShader;
-	
+
 	vertexShader.Load("vertex.shader", GL_VERTEX_SHADER);
 	fragmentShader.Load("fragment.shader", GL_FRAGMENT_SHADER);
 
@@ -313,11 +320,11 @@ bool initialize()
 	glAttachShader(program, vertexShader.GetID());
 	glAttachShader(program, fragmentShader.GetID());
 	glLinkProgram(program);
-	
+
 	// Check if the shaders linked properly
 	GLint shader_status;
 	glGetProgramiv(program, GL_LINK_STATUS, &shader_status);
-	
+
 	if(!shader_status)
 	{
 		std::cerr << "[F] THE SHADER PROGRAM FAILED TO LINK" << std::endl;
@@ -346,9 +353,9 @@ bool initialize()
 	}
 
 	// Set up any parameters for the models
-	planet.SetOrbit(4.0f, 4.0f); // doesn't need to be dynamically set (yet)
+	planet.SetOrbit(5.0f, 5.0f); // doesn't need to be dynamically set (yet)
 	moon.SetOrbit(2.0f, 2.0f);
-	
+
 	// Init the view and projection matrices
 	//  Matrices are defined statically because the camera is static
 	view = glm::lookAt( glm::vec3(0.0, 8.0, -16.0),		// Eye Position
@@ -358,7 +365,7 @@ bool initialize()
 	projection = glm::perspective( 45.0f,				// FoV (90 degrees)
 								   float(w)/float(h),	// Aspect ratio
 								   0.01f,				// Distance to the near plane
-								   100.0f );			// Distance to the far plane 
+								   100.0f );			// Distance to the far plane
 
 	// Depth testing tells not to draw far-away occluded objects
 	glEnable(GL_DEPTH_TEST);

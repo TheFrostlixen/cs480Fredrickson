@@ -6,6 +6,8 @@ Model::Model()
 	long_radius = 0.0f;
 	isSpinning = true;
 	spinDirection = false;
+	angleRotation = 0.0f;
+	angleTranslation = 0.0f;
 }
 
 Model::~Model()
@@ -18,20 +20,18 @@ Model::~Model()
 
 void Model::Spin(float dt)
 {
-	// Rotation
-	static float angleRotation = 0.0;
+    // Check spinning flag
+    if (isSpinning)
+    {
+        // Check which direction it's spinning
+        if (spinDirection)
+            angleRotation -= dt * M_PI/2;
+        else
+            angleRotation += dt * M_PI/2;
+    }
 
-	// Check spinning flag
-	if (isSpinning)
-	{
-		// Check which direction it's spinning
-		if (spinDirection)
-			angleRotation -= dt * M_PI/2;
-		else
-			angleRotation += dt * M_PI/2;
-	}
-	// Update the model matrix
-	model = glm::rotate(model, 2*angleRotation, glm::vec3(0.0f, 1.0f, 0.0f));
+    // Update the model matrix
+    model = glm::rotate(model, 2*angleRotation, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void Model::SwitchSpinDirection()
@@ -50,13 +50,12 @@ bool Model::ToggleSpin()
 	return isSpinning;
 }
 
-void Model::Orbit( glm::mat4 origin, float dt )
+void Model::Orbit( glm::mat4 origin, float dt, bool clockwise, float speed)
 {
-	// Translation angle
-	static float angleTranslation = 0.0f;
-	
-	// Move through 90 degrees a second
-	angleTranslation += dt * M_PI/2.0;
+    if(clockwise)
+        angleTranslation += dt * M_PI/2.0; // Move through 90 degrees a second
+    else
+        angleTranslation -= dt * M_PI/2.0; // Move through 90 degrees a second
 
 	// Update the model matrix
 	model = glm::translate( origin,
@@ -77,5 +76,10 @@ void Model::SetOrbit( float latitude, float longitude )
 void Model::SetSpinning( bool spin )
 {
 	isSpinning = spin;
+}
+
+void Model::Scale(const glm::vec3 &scaleMat)
+{
+    model = glm::scale(model, scaleMat);
 }
 
