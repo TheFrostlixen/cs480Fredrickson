@@ -11,7 +11,6 @@ class Shader
 {
 	public:
 		Shader();
-		Shader(std::string, GLuint);
 		~Shader();
 
 		// load and compile a shader program

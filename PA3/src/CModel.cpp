@@ -41,7 +41,7 @@ void Model::SwitchSpinDirection()
 
 void Model::SwitchSpinDirection( bool ccw )
 {
-	spinDirection = dir;
+	spinDirection = ccw;
 }
 
 bool Model::ToggleSpin()

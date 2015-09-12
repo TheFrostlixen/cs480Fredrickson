@@ -9,6 +9,7 @@ Shader::Shader()
 }
 
 // Lazy usage constructor
+/*
 Shader( std::string path, GLuint sType )
 {
 	loaded = false;
@@ -17,6 +18,7 @@ Shader( std::string path, GLuint sType )
 	
 	Load(path, sType);
 }
+*/
 
 // Default destructor, handled in Delete member function
 Shader::~Shader()

@@ -39,6 +39,7 @@ void render();
 void update();
 void reshape(int n_w, int n_h);
 void keyboard(unsigned char key, int x_pos, int y_pos);
+void arrowkeys(int key, int x_pos, int y_pos);
 void mouse(int btn, int state, int xPos, int yPos);
 void menu(int);
 
@@ -72,10 +73,11 @@ int main(int argc, char **argv)
 	glutDisplayFunc(render);	// Called to render the scene
 	glutReshapeFunc(reshape);	// Called if the window is resized
 	glutIdleFunc(update);		// Called if there is nothing else to do
-	glutKeyboardFunc(keyboard);	// Called if there is keyboard input
+	glutKeyboardFunc(keyboard);	// Called if there is standard keyboard input
+	glutSpecialFunc(arrowkeys); // Called if there is special keyboard input
 	glutMouseFunc(mouse);		// Called if there is mouse input
 
-	// Set up menu
+	// Set up the menu
 	int menu_id = glutCreateMenu(menu);
 	glutSetMenu(menu_id);
 	glutAddMenuEntry("Start spinning", 0);
@@ -149,8 +151,11 @@ void update()
 	// Make the planet orbit (with origin at 1.0f)
 	planet.Orbit( glm::mat4(1.0f), dt );
 
-	// Make the planet spin (if it should be spinning)
+	// Make the planet spin appropriately
 	planet.Spin( dt );
+
+	// Orbit the moon around the planet
+	moon.Orbit( planet.GetModel(), dt );
 
 	// Update the state of the scene
 	glutPostRedisplay(); //call the display callback
@@ -172,17 +177,33 @@ void reshape(int n_w, int n_h)
 void keyboard(unsigned char key, int x_pos, int y_pos)
 {
 	// Handle keyboard input
-	if(key == 27) // ESC
+	switch (key)
 	{
-		exit(0);
+		case 27:
+			exit(0); // ESC
+			break;
+
+		case '1':
+			planet.ToggleSpin();
+			break;
 	}
-	else if (key == '1')
+}
+
+void arrowkeys(int key, int x_pos, int y_pos)
+{
+	switch (key)
 	{
-		planet.ToggleSpin();
-	}
-	else if (key == GLUT_KEY_LEFT || key == GLUT_KEY_RIGHT)
-	{
-		planet.SwitchSpinDirection();
+		case GLUT_KEY_LEFT:
+			planet.SwitchSpinDirection(true);
+			break;
+
+		case GLUT_KEY_RIGHT:
+			planet.SwitchSpinDirection(false);
+			break;
+
+		case GLUT_KEY_UP:
+			planet.ToggleSpin();
+			break;
 	}
 }
 
@@ -225,7 +246,6 @@ bool initialize()
 	// Initialize basic geometry and shaders for this example
 
 	//this defines a cube, this is why a model loader is nice
-	//you can also do this with a draw elements and indices, try to get that working
 	Vertex geometry[] = { {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
 						  {{-1.0, -1.0, 1.0}, {0.0, 0.0, 1.0}},
 						  {{-1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}},
@@ -282,11 +302,11 @@ bool initialize()
 	// Geometry is done
 
 	// Load and compile shaders
-	Shader vertexShader("vertex.shader", GL_VERTEX_SHADER);
-	Shader fragmentShader("fragment.shader", GL_FRAGMENT_SHADER);
+	Shader vertexShader;
+	Shader fragmentShader;
 	
-	//vertexShader.Load("vertex.shader", GL_VERTEX_SHADER);
-	//fragmentShader.Load("fragment.shader", GL_FRAGMENT_SHADER);
+	vertexShader.Load("vertex.shader", GL_VERTEX_SHADER);
+	fragmentShader.Load("fragment.shader", GL_FRAGMENT_SHADER);
 
 	// Link the 2 shader objects into a program
 	program = glCreateProgram();
@@ -327,9 +347,10 @@ bool initialize()
 
 	// Set up any parameters for the models
 	planet.SetOrbit(4.0f, 4.0f); // doesn't need to be dynamically set (yet)
+	moon.SetOrbit(2.0f, 2.0f);
 	
 	// Init the view and projection matrices
-	//  Matrices are set statically because the camera is static
+	//  Matrices are defined statically because the camera is static
 	view = glm::lookAt( glm::vec3(0.0, 8.0, -16.0),		// Eye Position
 						glm::vec3(0.0, 0.0, 0.0),		// Focus point
 						glm::vec3(0.0, 1.0, 0.0) );		// Y+ is up

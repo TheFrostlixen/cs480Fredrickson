@@ -6,26 +6,30 @@ This assignment achieves 4 primary goals.
 
 2. Encapsulation of models and relevant functions to a separate class (handles model translations and rotations).
 
-3. Keybindings for managing planet cube spin/orbit.
-
-4. Eliminated segfault on exit from menu bug.
+3. Key-press event callbacks for both standard and special key presses.
 
 ##Extra Credit
 N/A
 
 ##Issues Encountered
-- Segfault on exit: Program would segfault on exit from  menu. This was due to GLUT redefining the exit(0) call. Including STDLIB.h before the GLUT libraries fixed the definition of exit(0).
+- Segfault on exit: Program would segfault on exit from  menu. Currently being assessed.
+
+- Arrow key input: GLUT requires a special handler for certain key presses (callback defined through glutSpecialFunc(); ). This handler requires a different callback from the normal keyboard function; therefore, there are two functions that handle different types of key presses (keyboard and arrowkeys).
 
 ##Libraries
 - GLM (OpenGL Mathematics)
 - GLUT (OpenGL Utility Toolkit)
 
 ##Keyboard/mouse controls:
-- *1:* Toggle planet cube's spin on/off.
+- **1/Up Arrow Key:** Toggle planet cube's spin on/off.
 
-- *Left Click/Left & Right Arrow Keys:* Toggle cube's direction of spin.
+- **Left Arrow Key:** Rotate planet counter-clockwise.
 
-- *Right Click:* Open context menu.
+- **Right Arrow Key:** Rotate planet clockwise.
+
+- **Left Click:** Toggle cube's direction of spin.
+
+- **Right Click:** Open context menu.
 
 ##Instructions for compilation.
 >cd build/
