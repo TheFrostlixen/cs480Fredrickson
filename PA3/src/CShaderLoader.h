@@ -13,26 +13,28 @@ class Shader
 		Shader();
 		~Shader();
 
-		// load and compile a shader program
-		//  returns success/failure flag
-		bool Load(std::string, GLuint);
+		// Load and compile a shader program
+		///  path: file path to the shader file
+		///  sType: the type of shader being loaded
+		///  return: success/failure flag
+		bool Load( std::string path, GLuint sType );
 
-		// delete a shader program
+		// Delete a shader program
 		bool Delete();
 
-		// whether loading & compiling was successful
+		// Whether loading & compiling was successful
 		bool IsLoaded()
 		{
 			return loaded;
 		}
 
-		// return shader type
+		// Returns shader type
 		GLuint GetType()
 		{
 			return type;
 		}
 
-		// return shader id
+		// Returns shader id
 		GLuint GetID()
 		{
 			return id;
