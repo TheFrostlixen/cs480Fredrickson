@@ -155,11 +155,9 @@ void update()
 	// Make the planet orbit (with origin at 1.0f)
 	planet.Orbit( glm::mat4(1.0f), dt, true);
 
-    moon.Orbit(planet.GetModel(), dt, false, 4.0f);
-    moon.Scale(glm::vec3(0.3, 0.3, 0.3));
-
 	// Orbit the moon around the planet
-//	moon.Orbit( planet.GetModel(), dt, true );
+    moon.Orbit(planet.GetModel(), dt, false, 2.0f);
+    moon.Scale(0.3f);
 
 	// Make the planet spin appropriately
 	planet.Spin( dt );
@@ -210,6 +208,10 @@ void arrowkeys(int key, int x_pos, int y_pos)
 
 		case GLUT_KEY_UP:
 			planet.ToggleSpin();
+			break;
+
+		case GLUT_KEY_DOWN:
+			planet.SwitchSpinDirection();
 			break;
 	}
 }
