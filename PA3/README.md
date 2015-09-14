@@ -8,11 +8,13 @@ This assignment achieves 4 primary goals.
 
 3. Key-press event callbacks for both standard and special key presses.
 
+4. Addresses and fixes the infamous segfault on exit issue encountered previously.
+
 ##Extra Credit
 N/A
 
 ##Issues Encountered
-- Segfault on exit: Program would segfault on exit from  menu. Currently being assessed.
+- Segfault on exit: Program would segfault on exit from  menu. This issue was due to the vanilla GLUT framework lacking a way to gracefully exit from the main loop. FreeGLUT addressed this issue with the glutLeaveMainLoop() call. From now on, FreeGLUT will be used instead of vanilla GLUT.
 
 - Arrow key input: GLUT requires a special handler for certain key presses (callback defined through glutSpecialFunc(); ). This handler requires a different callback from the normal keyboard function; therefore, there are two functions that handle different types of key presses (keyboard and arrowkeys).
 

@@ -185,7 +185,7 @@ void keyboard(unsigned char key, int x_pos, int y_pos)
 	switch (key)
 	{
 		case 27:
-			exit(0); // ESC
+			glutLeaveMainLoop(); // ESC
 			break;
 
 		case '1':
@@ -242,7 +242,7 @@ void menu(int value)
 
 		// Exit game
 		case 2:
-			exit(0);
+			glutLeaveMainLoop();
 			break;
 	}
 }
