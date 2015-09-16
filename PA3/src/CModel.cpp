@@ -20,9 +20,9 @@ Model::~Model()
 	angleTranslation = 0.0f;
 }
 
-void Model::Orbit( glm::mat4 origin, float dt, bool clockwise, float speed )
+void Model::Orbit( glm::mat4 origin, float dt, bool ccw, float speed )
 {
-    if (clockwise)
+    if (ccw)
         angleTranslation += dt * M_PI/2.0; // Move through 90 degrees a second
     else
         angleTranslation -= dt * M_PI/2.0; // Move through 90 degrees a second
@@ -57,9 +57,9 @@ void Model::SwitchSpinDirection()
 	spinDirection = !spinDirection;
 }
 
-void Model::SwitchSpinDirection( bool clockwise )
+void Model::SwitchSpinDirection( bool ccw )
 {
-	spinDirection = clockwise;
+	spinDirection = ccw;
 }
 
 bool Model::ToggleSpin()

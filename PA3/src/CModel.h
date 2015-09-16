@@ -2,6 +2,7 @@
 #define CMODEL_H
 
 #include "global.h"
+#include <string>
 
 class Model
 {
@@ -46,6 +47,9 @@ class Model
 
 		// Returns whether the object should be spinning
 		bool IsSpinning() { return isSpinning; }
+
+        // Returns a string denoting spin direction
+        std::string GetSpinDirection() { return (spinDirection) ? "clockwise" : "counterclockwise"; };
 
 	private:
 		glm::mat4 model;
