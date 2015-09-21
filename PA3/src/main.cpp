@@ -147,7 +147,7 @@ void render()
     glUseProgram(0); // switch from shader programs to fixed function pipeline
     glColor3f( 1.0f, 1.0f, 1.0f );
     glRasterPos2f(0,0);
-    glutBitmapString( GLUT_BITMAP_TIMES_ROMAN_16, (const unsigned char*)planet.GetSpinDirection().c_str() );
+    glutBitmapString( GLUT_BITMAP_TIMES_ROMAN_10, (const unsigned char*)planet.GetSpinDirection().c_str() );
 
 	// Swap the buffers
 	glutSwapBuffers();
