@@ -116,21 +116,22 @@ void render()
                            3,                // number of elements
                            GL_FLOAT,        // type
                            GL_FALSE,        // normalized
-                           sizeof(Vertex),    // stride
+                           sizeof(glm::vec3),    // stride
                            0 );                // offset in the geometry array
 
     glVertexAttribPointer( loc_color,
                            3,
                            GL_FLOAT,
                            GL_FALSE,
-                           sizeof(Vertex),
-                           (void*)offsetof(Vertex,color) );
+                           sizeof(glm::vec3),
+                           0);
 
     // draw the model
     mvp = projection * view * mdl.GetModel();
     glUniformMatrix4fv(loc_mvpmat, 1, GL_FALSE, glm::value_ptr(mvp));
-    glDrawArrays(GL_TRIANGLES, 0, 36); // mode, starting index, count
+//    glDrawArrays(GL_TRIANGLES, 0, 36); // mode, starting index, count
 
+    mdl.Draw();
     // Clean up
     glDisableVertexAttribArray(loc_position);
     glDisableVertexAttribArray(loc_color);
@@ -147,10 +148,12 @@ void render()
 
 void update()
 {
-    //total time
-//  float dt = getDT(); // if you have anything moving, use dt.
+    // total time
+    float dt = getDT(); // if you have anything moving, use dt.
 
-    // TODO stuff
+    // move the model around
+    mdl.SetOrbit(3.0f, 3.0f);
+    mdl.Orbit(glm::mat4(1.0f), dt, true, 1.0f);
 
     // Update the state of the scene
     glutPostRedisplay(); //call the display callback
@@ -244,60 +247,12 @@ bool initialize()
 {
     // Initialize basic geometry and shaders for this example
 
-    //this defines a cube, this is why a model loader is nice
-    Vertex geometry[] = { {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
-                          {{-1.0, -1.0, 1.0}, {0.0, 0.0, 1.0}},
-                          {{-1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}},
-
-                          {{1.0, 1.0, -1.0}, {1.0, 1.0, 0.0}},
-                          {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
-                          {{-1.0, 1.0, -1.0}, {0.0, 1.0, 0.0}},
-
-                          {{1.0, -1.0, 1.0}, {1.0, 0.0, 1.0}},
-                          {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
-                          {{1.0, -1.0, -1.0}, {1.0, 0.0, 0.0}},
-
-                          {{1.0, 1.0, -1.0}, {1.0, 1.0, 0.0}},
-                          {{1.0, -1.0, -1.0}, {1.0, 0.0, 0.0}},
-                          {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
-
-                          {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
-                          {{-1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}},
-                          {{-1.0, 1.0, -1.0}, {0.0, 1.0, 0.0}},
-
-                          {{1.0, -1.0, 1.0}, {1.0, 0.0, 1.0}},
-                          {{-1.0, -1.0, 1.0}, {0.0, 0.0, 1.0}},
-                          {{-1.0, -1.0, -1.0}, {0.0, 0.0, 0.0}},
-
-                          {{-1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}},
-                          {{-1.0, -1.0, 1.0}, {0.0, 0.0, 1.0}},
-                          {{1.0, -1.0, 1.0}, {1.0, 0.0, 1.0}},
-
-                          {{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}},
-                          {{1.0, -1.0, -1.0}, {1.0, 0.0, 0.0}},
-                          {{1.0, 1.0, -1.0}, {1.0, 1.0, 0.0}},
-
-                          {{1.0, -1.0, -1.0}, {1.0, 0.0, 0.0}},
-                          {{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}},
-                          {{1.0, -1.0, 1.0}, {1.0, 0.0, 1.0}},
-
-                          {{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}},
-                          {{1.0, 1.0, -1.0}, {1.0, 1.0, 0.0}},
-                          {{-1.0, 1.0, -1.0}, {0.0, 1.0, 0.0}},
-
-                          {{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}},
-                          {{-1.0, 1.0, -1.0}, {0.0, 1.0, 0.0}},
-                          {{-1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}},
-
-                          {{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}},
-                          {{-1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}},
-                          {{1.0, -1.0, 1.0}, {1.0, 0.0, 1.0}}
-                        };
+    mdl.LoadModel( "model.obj" );
 
     // Create a Vertex Buffer object (VBO) to store this vertex info on the GPU
     glGenBuffers(1, &vbo_geometry);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_geometry);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(geometry), geometry, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * mdl.GetVertices().size(), &mdl.GetVertices().front(), GL_STATIC_DRAW);
     // Geometry is done
 
     // Load and compile shaders

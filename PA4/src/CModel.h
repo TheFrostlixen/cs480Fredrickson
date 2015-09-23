@@ -5,12 +5,15 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 class Model
 {
 	public:
 		Model();
 		~Model();
+
+		void Draw();
 
         int LoadModel( std::string path );
 
@@ -55,6 +58,15 @@ class Model
         // Returns a string denoting spin direction
         std::string GetSpinDirection() { return (spinDirection) ? "clockwise" : "counterclockwise"; };
 
+        // Return the vertices of the model loaded
+        std::vector<glm::vec3> GetVertices() { return vertices; }
+
+        // Return the texture coordinates
+        std::vector<glm::vec2> GetTxCoordinates() { return txPoints; }
+
+        // Return the normals
+        std::vector<glm::vec3> GetNormals() { return normals; }
+
 	private:
 		glm::mat4 model;
 
@@ -66,6 +78,10 @@ class Model
 
 		float angleTranslation;
 		float angleRotation;
+
+        std::vector<glm::vec3> vertices;
+        std::vector<glm::vec2> txPoints;
+        std::vector<glm::vec3> normals;
 };
 
 #endif

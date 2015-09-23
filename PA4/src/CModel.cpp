@@ -1,4 +1,8 @@
 #include "CModel.h"
+#include <vector>
+#include <cstdlib>
+#include <iostream>
+using namespace std;
 
 Model::Model()
 {
@@ -23,33 +27,140 @@ Model::~Model()
 int Model::LoadModel( std::string path )
 {
     // This is what the data will be read in to
-    std::string src = "";
-    int vertices = 0;
+    string line = "";
 
     // Set up file IO ops
-    std::ifstream fin(path.c_str());
-    std::stringstream stream;
+    ifstream fin(path.c_str());
 
     // Clear any file/stream flags
     fin.clear();
-    stream.flush();
 
-    // Read file
-    if ( fin.good() )
+    vector<unsigned int> iVertices, iTextures, iNormals;
+    vector<glm::vec3> tempVertices;
+    vector<glm::vec2> tempTextures;
+    vector<glm::vec3> tempNormals;
+
+    string txName = "";
+
+    while ( getline( fin, line, '\n' ) )
     {
-        stream << fin.rdbuf();  // read buffer into stream
-        src = stream.str();     // load stream into source string
+        string firstChar;
+        istringstream stream(line);
+
+        stream >> firstChar;
+
+        if (firstChar == "v")
+        {
+            glm::vec3 vertex;
+            stream >> vertex.x >> vertex.y >> vertex.z;
+            tempVertices.push_back(vertex);
+        }
+        // Texture
+        else if (firstChar == "vt")
+        {
+            glm::vec2 texture;
+            stream >> texture.x >> texture.y;
+            tempTextures.push_back(texture);
+        }
+        // Normal
+        else if (firstChar == "vn")
+        {
+            glm::vec3 normal;
+            stream >> normal.x >> normal.y >> normal.z;
+            tempNormals.push_back(normal);
+        }
+        // Face
+        else if (firstChar == "f")
+        {
+            string a, b, c = "";
+            string read;
+            stream >> a >> b >> c;
+
+            vector<string> items;
+
+            // parse the numbers in a
+            istringstream ssA(a);
+            for(string each; getline(ssA, each, '/'); items.push_back(each));
+
+            // parse the numbers in b
+            istringstream ssB(b);
+            for(string each; getline(ssB, each, '/'); items.push_back(each));
+
+            // parse the numbers in c
+            istringstream ssC(c);
+            for(string each; getline(ssC, each, '/'); items.push_back(each));
+
+            // convert & push vertices
+            iVertices.push_back( (unsigned)stoi(items[0]) );
+            iVertices.push_back( (unsigned)stoi(items[3]) );
+            iVertices.push_back( (unsigned)stoi(items[6]) );
+
+            // convert & push texture coordinates
+            if(items[1] != "")
+                iTextures.push_back( (unsigned)stoi(items[1]) );
+            if(items[4] != "")
+                iTextures.push_back( (unsigned)stoi(items[4]) );
+            if(items[7] != "")
+                iTextures.push_back( (unsigned)stoi(items[7]) );
+
+            // convert & push normals
+            iNormals.push_back( (unsigned)stoi(items[2]) );
+            iNormals.push_back( (unsigned)stoi(items[5]) );
+            iNormals.push_back( (unsigned)stoi(items[8]) );
+        }
+        // Material
+        else if (firstChar == "usemtl")
+        {
+            stream >> txName;
+        }
     }
-    else
+
+    cout << "Loaded Vertices: " << endl;
+    for(unsigned int i = 0; i < tempVertices.size(); i++)
     {
-        // Reading file failed somehow, print error message and quit
-        printf( "File %s could not be read...\n", path.c_str() );
-        return 0;
+        cout << tempVertices[i].x << " " << tempVertices[i].y << " " << tempVertices[i].z << endl;
+    }
+    cout << endl;
+
+    cout << "Loaded Texture Coordinates: " << endl;
+    for(unsigned int i = 0; i < tempTextures.size(); i++)
+    {
+        cout << tempTextures[i].x << " " << tempTextures[i].y << endl;;
+    }
+    cout << endl;
+
+    cout << "Loaded Normals: " << endl;
+    for(unsigned int i = 0; i < tempNormals.size(); i++)
+    {
+        cout << tempNormals[i].x << " " << tempNormals[i].y << " " << tempNormals[i].z << endl;
+    }
+    cout << endl;
+
+    // push back vertices to member variable
+    for (unsigned int i = 0; i < iVertices.size(); i++)
+    {
+        unsigned int index = iVertices[i];
+        glm::vec3 v = tempVertices[index-1];
+        vertices.push_back(v);
     }
 
-    // TODO do stuff with model
+    // push back textures to member variable
+    for (unsigned int i = 0; i < iTextures.size(); i++)
+    {
+        unsigned int index = iTextures[i];
+        glm::vec2 coords = tempTextures[index-1];
+        txPoints.push_back(coords);
+    }
 
-    return vertices;
+    // push back normals to member variable
+    for (unsigned int i = 0; i < iNormals.size(); i++)
+    {
+        unsigned int index = iNormals[i];
+        glm::vec3 norms = tempNormals[index-1];
+        normals.push_back(norms);
+    }
+
+    return GetVertices().size();
 }
 
 void Model::Orbit( glm::mat4 origin, float dt, bool ccw, float speed )
@@ -117,3 +228,7 @@ void Model::SetSpinning( bool spin )
 	isSpinning = spin;
 }
 
+void Model::Draw()
+{
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
+}
