@@ -247,7 +247,7 @@ bool initialize()
 {
     // Initialize basic geometry and shaders for this example
 
-    mdl.LoadModel( "model.obj" );
+    mdl.LoadModel( "table.obj" );
 
     // Create a Vertex Buffer object (VBO) to store this vertex info on the GPU
     glGenBuffers(1, &vbo_geometry);

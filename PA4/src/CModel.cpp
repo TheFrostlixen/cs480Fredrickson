@@ -115,6 +115,7 @@ int Model::LoadModel( std::string path )
         }
     }
 
+    /*
     cout << "Loaded Vertices: " << endl;
     for(unsigned int i = 0; i < tempVertices.size(); i++)
     {
@@ -135,6 +136,7 @@ int Model::LoadModel( std::string path )
         cout << tempNormals[i].x << " " << tempNormals[i].y << " " << tempNormals[i].z << endl;
     }
     cout << endl;
+    */
 
     // push back vertices to member variable
     for (unsigned int i = 0; i < iVertices.size(); i++)

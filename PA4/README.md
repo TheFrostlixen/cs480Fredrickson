@@ -11,7 +11,7 @@ This assignment achieves 3 primary goals.
 3. Inclusion of a custom OBJ file of a board with walls.
 
 ##Extra Credit
-TBD
+- Added colors to the material
 
 ##Issues Encountered
 - If I started to list them all, I wouldn't make the submission deadline.
