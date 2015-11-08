@@ -1,4 +1,15 @@
-CS 480 - Graphics - PA9
--
+PA9 - Air Hockey
 
->Please refer to Matt Berger (@matthewjberger)'s code for PA9. This repository will be updated after the submission deadline with the finalized code.
+##Authors
+
+Matthew Berger and Matt Fredrickson
+
+##Dependencies
+
+To install the dependencies run the install_dependencies.sh script.
+
+##Controls
+
+Mouse: Control Player1 paddle
+Menu: Choose view, start, stop, pause game.
+ESC: Quit the game.
